@@ -46,7 +46,7 @@ function restartSingleResource(thePlayer, commandName, resourceName, seconds)
 						outputChatBox("* It may take up to a minute before your inventory re-appears. *", root, 255, 0, 0)
 					end
 
-				elseif resourceName:lower() == "shop-system" then
+				elseif resourceName:lower() == "npc" then
 					if (not getElementData(thePlayer, "resconfirmed") and not exports.integration:isPlayerScripter(thePlayer)) then
 						outputChatBox("Are you sure you want to restart Shop-system? It will be causing massive lag. Re-type it if you are sure.", thePlayer)
 						setElementData(thePlayer, "resconfirmed", true)
@@ -57,6 +57,19 @@ function restartSingleResource(thePlayer, commandName, resourceName, seconds)
 					else
 						--delayTime = 10*1000
 						outputChatBox("* Shop-system is restarting in "..seconds.." seconds! *", root, 255, 0, 0)
+						outputChatBox("* There will be a short Network Trouble during the time, please standby.. *", root, 255, 0, 0)
+					end
+				elseif resourceName:lower() == "hud" then
+					if (not getElementData(thePlayer, "resconfirmed") and not exports.integration:isPlayerScripter(thePlayer)) then
+						outputChatBox("Are you sure you want to restart hud? It will be causing massive lag. Re-type it if you are sure.", thePlayer)
+						setElementData(thePlayer, "resconfirmed", true)
+						setTimer(function ()
+								setElementData(thePlayer, "resconfirmed", false)
+							end, 10000, 1)
+						return false
+					else
+						--delayTime = 10*1000
+						outputChatBox("* Hud is restarting in "..seconds.." seconds! *", root, 255, 0, 0)
 						outputChatBox("* There will be a short Network Trouble during the time, please standby.. *", root, 255, 0, 0)
 					end
 				elseif resourceName:lower() == "item-world" then
@@ -71,6 +84,19 @@ function restartSingleResource(thePlayer, commandName, resourceName, seconds)
 					else
 						--delayTime = 10*1000
 						outputChatBox("* Item-world is restarting in "..seconds.." seconds! *", root, 255, 0, 0)
+						outputChatBox("* There will be a short Network Trouble during the time, please standby.. *", root, 255, 0, 0)
+					end
+				elseif resourceName:lower() == "vehicle" then
+					if (not getElementData(thePlayer, "resconfirmed") and not exports.integration:isPlayerScripter(thePlayer)) then
+						outputChatBox("Are you sure you want to restart vehicles? It will be causing massive lag. Re-type it if you are sure.", thePlayer)
+						setElementData(thePlayer, "resconfirmed", true)
+						setTimer(function ()
+								setElementData(thePlayer, "resconfirmed", false)
+							end, 10000, 1)
+						return false
+					else
+						--delayTime = 10*1000
+						outputChatBox("* Vehicles are restarting in "..seconds.." seconds! *", root, 255, 0, 0)
 						outputChatBox("* There will be a short Network Trouble during the time, please standby.. *", root, 255, 0, 0)
 					end
 				end
