@@ -1,0 +1,7 @@
+<meta>
+    <info author="OwlGaming MTA Server Development Team" type="script" description="Dominação Soberana MVP" />
+    <script src="config.lua" type="server" />
+    <script src="s_domination.lua" type="server" />
+
+    <export function="grantCosmeticSlot" type="server" />
+</meta>
