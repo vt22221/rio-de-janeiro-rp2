@@ -51,6 +51,10 @@ donationPerks = {
 			[41] = { "Free interior rentals",																						400,	0},
 			[42] = { "Extra character slot",																						15,		1},
 			[43] = { "Instant Dupont Manufacture",																					50,		0},
+			[44] = { "Boost de pesquisa de facção (reduz tempo em 25%)",															200,	0},
+			[45] = { "Contrato prioritário de logística (2x na próxima entrega)",													150,	0},
+			[46] = { "Kit de reparo emergencial (veículo civil)",																	120,	0},
+			[47] = { "Slot cosmético (skin/efeito)",																				180,	0},
 
 --					Title																											Points	Time
 }

@@ -245,6 +245,32 @@ function givePlayerPerk(targetPlayer, perkID, perkValue, days, points, ...)
 				loadAllPerks(targetPlayer)
 				addPurchaseHistory(targetPlayer, (donationPerks[tonumber(perkID)][1] or "").."", -points)
 				return true, "Perk activated: Increased max manufacture slot."
+			elseif tonumber(perkID) == 44 or tonumber(perkID) == 45 or tonumber(perkID) == 46 or tonumber(perkID) == 47 then
+				local addValue = tonumber(perkValue) or 1
+				local existingValue = 0
+				local mysqlQ = exports.mysql:query("SELECT `perkValue` FROM `donators` WHERE `accountID`='".. tostring(gameAccountID) .."' AND `perkID`='".. exports.mysql:escape_string(perkID) .."' LIMIT 1")
+				if mysqlQ then
+					local row = exports.mysql:fetch_assoc(mysqlQ)
+					if row then
+						existingValue = tonumber(row.perkValue) or 0
+					end
+					exports.mysql:free_result(mysqlQ)
+				end
+				local newValue = existingValue + addValue
+				if existingValue > 0 then
+					exports.mysql:query_free("UPDATE `donators` SET `perkValue`='".. exports.mysql:escape_string(tostring(newValue)) .."', `expirationDate`=NULL WHERE `accountID`='".. tostring(gameAccountID) .."' AND `perkID`='".. exports.mysql:escape_string(perkID) .."'")
+				else
+					exports.mysql:query_free("INSERT INTO `donators` (accountID, perkID, perkValue, expirationDate) VALUES ('".. tostring(gameAccountID)  .."', '".. exports.mysql:escape_string(perkID) .."', '".. exports.mysql:escape_string(tostring(newValue)) .."', NULL)")
+				end
+				dbExec( exports.mysql:getConn('core'), "UPDATE accounts SET credits=credits-? WHERE id=? ", points, gameAccountID )
+				setElementData(targetPlayer, "credits", curGC-points)
+				loadAllPerks(targetPlayer)
+				local dominationRes = getResourceFromName("domination-system")
+				if dominationRes and getResourceState(dominationRes) == "running" and tonumber(perkID) == 47 then
+					exports["domination-system"]:grantCosmeticSlot(targetPlayer, newValue)
+				end
+				addPurchaseHistory(targetPlayer, (donationPerks[tonumber(perkID)][1] or "").."", -points)
+				return true, "Perk activated"
 			else -- Handle the regular perks
 				exports.mysql:query_free("INSERT INTO `donators` (accountID, perkID, perkValue, expirationDate) VALUES ('".. tostring(gameAccountID)  .."', '".. exports.mysql:escape_string(perkID) .."', '".. exports.mysql:escape_string(perkValue) .."', NOW() + interval " .. tostring(days).." day)")
 				
