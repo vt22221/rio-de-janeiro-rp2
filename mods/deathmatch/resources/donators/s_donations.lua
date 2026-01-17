@@ -61,6 +61,21 @@ end
 addEvent("donators:updatePerkValue", true)
 addEventHandler("donators:updatePerkValue", root, updatePerkValue)
 
+local function getPrimaryFactionId(player)
+	local factionData = getElementData(player, "faction") or {}
+	local selectedId
+	local selectedCount = math.huge
+	for factionId, data in pairs(factionData) do
+		if data.count and data.count < selectedCount then
+			selectedId = factionId
+			selectedCount = data.count
+		elseif not data.count and not selectedId then
+			selectedId = factionId
+		end
+	end
+	return tonumber(selectedId)
+end
+
 function givePlayerPerk(targetPlayer, perkID, perkValue, days, points, ...)
 	if not isElement( targetPlayer ) then
 		return false, "Internal script error 100.1"
@@ -271,6 +286,66 @@ function givePlayerPerk(targetPlayer, perkID, perkValue, days, points, ...)
 				end
 				addPurchaseHistory(targetPlayer, (donationPerks[tonumber(perkID)][1] or "").."", -points)
 				return true, "Perk activated"
+			elseif tonumber(perkID) >= 48 and tonumber(perkID) <= 56 then
+				local monetizationRes = getResourceFromName("domination-monetization")
+				if not monetizationRes or getResourceState(monetizationRes) ~= "running" then
+					return false, "Sistema de monetização soberana indisponível."
+				end
+				local monetization = exports["domination-monetization"]
+				if tonumber(perkID) == 48 or tonumber(perkID) == 49 or tonumber(perkID) == 50 then
+					local tierMap = {
+						[48] = "basic",
+						[49] = "elite",
+						[50] = "warlord",
+					}
+					local tier = tierMap[tonumber(perkID)]
+					local ok, resultTier = monetization:grantVipSubscription(targetPlayer, tier, 1)
+					if not ok then
+						return false, resultTier or "Falha ao ativar assinatura VIP."
+					end
+					dbExec( exports.mysql:getConn('core'), "UPDATE accounts SET credits=credits-? WHERE id=? ", points, gameAccountID )
+					setElementData(targetPlayer, "credits", curGC-points)
+					addPurchaseHistory(targetPlayer, (donationPerks[tonumber(perkID)][1] or "").."", -points)
+					return true, "Assinatura VIP ativada: " .. tostring(resultTier) .. "."
+				end
+				local scope
+				local boostType
+				local targetId
+				if tonumber(perkID) == 51 then
+					scope = "player"
+					boostType = "research"
+				elseif tonumber(perkID) == 52 then
+					scope = "player"
+					boostType = "logistics"
+				elseif tonumber(perkID) == 53 then
+					scope = "player"
+					boostType = "production"
+				elseif tonumber(perkID) == 54 then
+					scope = "faction"
+					boostType = "research"
+				elseif tonumber(perkID) == 55 then
+					scope = "faction"
+					boostType = "logistics"
+				elseif tonumber(perkID) == 56 then
+					scope = "faction"
+					boostType = "production"
+				end
+				if scope == "player" then
+					targetId = gameAccountID
+				else
+					targetId = getPrimaryFactionId(targetPlayer)
+				end
+				if scope == "faction" and not targetId then
+					return false, "Você precisa estar em uma facção para ativar este boost."
+				end
+				local ok, message = monetization:activateBoost(targetPlayer, scope, targetId, boostType)
+				if not ok then
+					return false, message or "Falha ao ativar boost."
+				end
+				dbExec( exports.mysql:getConn('core'), "UPDATE accounts SET credits=credits-? WHERE id=? ", points, gameAccountID )
+				setElementData(targetPlayer, "credits", curGC-points)
+				addPurchaseHistory(targetPlayer, (donationPerks[tonumber(perkID)][1] or "").."", -points)
+				return true, "Boost soberano ativado."
 			else -- Handle the regular perks
 				exports.mysql:query_free("INSERT INTO `donators` (accountID, perkID, perkValue, expirationDate) VALUES ('".. tostring(gameAccountID)  .."', '".. exports.mysql:escape_string(perkID) .."', '".. exports.mysql:escape_string(perkValue) .."', NOW() + interval " .. tostring(days).." day)")
 				
