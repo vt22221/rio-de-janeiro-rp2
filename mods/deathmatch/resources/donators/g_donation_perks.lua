@@ -55,6 +55,15 @@ donationPerks = {
 			[45] = { "Contrato prioritário de logística (2x na próxima entrega)",													150,	0},
 			[46] = { "Kit de reparo emergencial (veículo civil)",																	120,	0},
 			[47] = { "Slot cosmético (skin/efeito)",																				180,	0},
+			[48] = { "Assinatura VIP Basic (30 dias)",																				300,	30},
+			[49] = { "Assinatura VIP Elite (30 dias)",																				550,	30},
+			[50] = { "Assinatura VIP Warlord (30 dias)",																			850,	30},
+			[51] = { "Boost soberano de pesquisa (jogador)",																		200,	0},
+			[52] = { "Boost soberano de logística (jogador)",																		200,	0},
+			[53] = { "Boost soberano de produção (jogador)",																		200,	0},
+			[54] = { "Boost soberano de pesquisa (facção)",																		250,	0},
+			[55] = { "Boost soberano de logística (facção)",																		250,	0},
+			[56] = { "Boost soberano de produção (facção)",																		250,	0},
 
 --					Title																											Points	Time
 }

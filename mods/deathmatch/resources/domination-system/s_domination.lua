@@ -21,6 +21,14 @@ local function nowTimestamp()
     return getRealTime().timestamp
 end
 
+local function getMonetizationExports()
+    local resource = getResourceFromName("domination-monetization")
+    if resource and getResourceState(resource) == "running" then
+        return exports["domination-monetization"]
+    end
+    return nil
+end
+
 local function formatResourceList(resources)
     local parts = {}
     for _, key in ipairs(RESOURCE_TYPES) do
@@ -577,6 +585,39 @@ local function countFactionModulesByType(factionId, moduleType)
     return count
 end
 
+local function buildProductionReward(factionId, factoryCount)
+    if factoryCount <= 0 then
+        return nil
+    end
+    local reward = {}
+    for _, key in ipairs(RESOURCE_TYPES) do
+        reward[key] = (PRODUCTION_SETTINGS.rewardPerFactory[key] or 0) * factoryCount
+    end
+    local monetization = getMonetizationExports()
+    if monetization then
+        local multiplier = monetization:getProductionMultiplier(factionId)
+        if multiplier and multiplier ~= 1 then
+            for _, key in ipairs(RESOURCE_TYPES) do
+                reward[key] = math.floor(reward[key] * multiplier)
+            end
+        end
+    end
+    return reward
+end
+
+local function runProductionTick()
+    for factionId in pairs(factionModules) do
+        local factoryCount = countFactionModulesByType(factionId, "factory")
+        if factoryCount > 0 then
+            local reward = buildProductionReward(factionId, factoryCount)
+            if reward then
+                adjustFactionStock(factionId, reward)
+                logs:dbLog("fa" .. tostring(factionId), 4, "fa" .. tostring(factionId), "Domination production tick: faction " .. factionId .. " reward " .. formatResourceList(reward))
+            end
+        end
+    end
+end
+
 local function canAttackModule(attackerFaction, defenderFaction)
     return attackerFaction and defenderFaction and isWarActiveBetween(attackerFaction, defenderFaction)
 end
@@ -826,6 +867,11 @@ addCommandHandler("factionresearch", function(player, command, techId, boost)
             end
         end
         local duration = tech.duration
+        local monetization = getMonetizationExports()
+        if monetization then
+            local multiplier = monetization:getResearchMultiplier(player, factionId)
+            duration = math.max(1, math.floor(duration * multiplier))
+        end
         if boost and string.lower(boost) == "boost" then
             if updateResearchBoost(player) then
                 duration = math.floor(duration * RESEARCH_BOOST_FACTOR)
@@ -1013,6 +1059,15 @@ addCommandHandler("logisticsstart", function(player, command, routeId)
             end
             outputChatBox("[Dominação] Contrato prioritário aplicado. Entrega em dobro.", player, 90, 220, 90)
         end
+        local monetization = getMonetizationExports()
+        if monetization then
+            local multiplier = monetization:getLogisticsMultiplier(player, factionId)
+            if multiplier and multiplier ~= 1 then
+                for _, key in ipairs(RESOURCE_TYPES) do
+                    reward[key] = math.floor(reward[key] * multiplier)
+                end
+            end
+        end
         adjustFactionStock(factionId, reward)
         exports.global:giveMoney(player, 750, true)
         exports.factions:sendNotiToAllFactionMembers(factionId, "Entrega Concluída", "Recursos adicionados ao depósito.", false)
@@ -1127,6 +1182,9 @@ addEventHandler("onResourceStart", resourceRoot, function()
     loadWars()
     createLogisticsMarkers()
     setupEventTimers()
+    if PRODUCTION_SETTINGS and PRODUCTION_SETTINGS.interval then
+        setTimer(runProductionTick, PRODUCTION_SETTINGS.interval * 1000, 0)
+    end
     outputDebugString("[Dominação] Sistema carregado.")
 end)
 

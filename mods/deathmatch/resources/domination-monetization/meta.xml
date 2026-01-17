@@ -1,0 +1,14 @@
+<meta>
+    <info author="OwlGaming" name="Domination Monetization" type="script" version="1.0" />
+    <script type="server" src="config.lua" />
+    <script type="server" src="s_monetization.lua" />
+
+    <export function="grantVipSubscription" type="server" />
+    <export function="getVipTier" type="server" />
+    <export function="activateBoost" type="server" />
+    <export function="getResearchMultiplier" type="server" />
+    <export function="getLogisticsMultiplier" type="server" />
+    <export function="getProductionMultiplier" type="server" />
+    <export function="getBoostStatus" type="server" />
+    <export function="getBoostMultiplier" type="server" />
+</meta>

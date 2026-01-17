@@ -145,6 +145,11 @@ EVENT_SETTINGS = {
     airdropReward = { oil = 20, steel = 20, components = 15, elite_components = 5 },
 }
 
+PRODUCTION_SETTINGS = {
+    interval = 1800,
+    rewardPerFactory = { oil = 8, steel = 12, components = 10, elite_components = 2 },
+}
+
 WAR_SETTINGS = {
     cooldownHours = 6,
     delayMinutes = 5,
